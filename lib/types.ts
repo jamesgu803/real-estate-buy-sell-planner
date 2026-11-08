@@ -1,3 +1,9 @@
+/**
+ * Largest return the app accepts. Vercel rejects request bodies over 4.5 MB before
+ * they reach the function, so the limit leaves room for the multipart envelope.
+ */
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 export type PropertyType =
   | "single_family"
   | "multi_family"

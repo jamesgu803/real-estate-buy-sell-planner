@@ -25,7 +25,7 @@ export function describeError(error: unknown): { status: number; message: string
     return { status: 429, message: "The AI service is busy. Try again in a minute." };
   }
   if (error instanceof Anthropic.BadRequestError) {
-    return { status: 400, message: "The AI service couldn't read that file. Make sure it's a text-based or scanned PDF under 32 MB." };
+    return { status: 400, message: "The AI service couldn't read that file. Make sure it's a text-based or scanned PDF under 4 MB." };
   }
   if (error instanceof Anthropic.APIConnectionError) {
     return { status: 502, message: "Couldn't reach the AI service." };

@@ -3,6 +3,7 @@ import { Brief } from "@/lib/brief";
 import { anthropic, describeError, FALLBACK, MODEL } from "@/lib/claude";
 import { compareStrategies, currentCashFlow, equity, STRATEGY_LABEL } from "@/lib/engine";
 import { propertySignals } from "@/lib/signals";
+import { currentAdvisor, unauthorized } from "@/lib/session";
 import type { Assumptions, ClientProfile, Property } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -15,6 +16,7 @@ You'll get one property's figures and a deterministic model comparing holding, s
 Write for the advisor, not the client. Be specific and plain-spoken, cite dollar amounts from the data, and keep each talking point under 60 words. Don't make a final recommendation: the advisor owns that. Note where the client's goals (liquidity, estate plans, appetite for being a landlord) would change the answer.`;
 
 export async function POST(request: Request) {
+  if (!(await currentAdvisor())) return unauthorized();
   const body = (await request.json().catch(() => null)) as {
     property?: Property;
     client?: ClientProfile;

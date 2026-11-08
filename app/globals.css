@@ -331,6 +331,128 @@ select {
   margin-top: 12px;
 }
 
+/* ---------- Accounts & saved clients ---------- */
+
+.intake-side {
+  display: grid;
+  gap: 20px;
+}
+.auth {
+  display: grid;
+  gap: 14px;
+  padding: 8px 4px;
+}
+.auth .error {
+  margin-top: 0;
+}
+.auth-switch {
+  text-align: center;
+}
+.text-input {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+.text-input:focus {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.account-line {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.account-line strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.btn.danger {
+  background: var(--risk);
+  color: #fff;
+}
+.save-state {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-right: 8px;
+}
+.notice.floating {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  box-shadow: var(--shadow);
+}
+.saved {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+.saved-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+.saved-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.saved-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding: 6px 0;
+}
+.saved-list li:first-child {
+  border-top: 0;
+}
+.saved-open {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 6px 8px;
+  margin-left: -8px;
+  border-radius: 8px;
+}
+.saved-open:hover {
+  background: var(--surface-2);
+}
+.saved-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.saved-confirm {
+  display: flex;
+  gap: 4px;
+}
+
 /* ---------- Shell ---------- */
 
 .shell {

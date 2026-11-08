@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { Advisor, SavedClient } from "@/lib/accounts";
 import { DEFAULT_ASSUMPTIONS } from "@/lib/engine";
+import { api } from "@/lib/http";
 import { SAMPLE_PORTFOLIO } from "@/lib/sample";
 import type { Assumptions, ClientProfile, EstimableField, Portfolio, Property } from "@/lib/types";
 import { FactSheet } from "./FactSheet";
@@ -11,12 +13,27 @@ import { PropertyView } from "./PropertyView";
 import { Settings } from "./Settings";
 
 type View = { kind: "portfolio" } | { kind: "property"; id: string } | { kind: "factsheet"; id: string };
+type SaveState = "saved" | "saving" | "error";
+
+const AUTOSAVE_MS = 800;
 
 export function Workspace() {
+  const [advisor, setAdvisor] = useState<Advisor | null | undefined>(undefined);
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [assumptions, setAssumptions] = useState<Assumptions>(DEFAULT_ASSUMPTIONS);
   const [view, setView] = useState<View>({ kind: "portfolio" });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // The saved record this workspace is editing; null for the demo or an unsaved upload.
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>("saved");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const lastSaved = useRef<string | null>(null);
+
+  useEffect(() => {
+    api<{ advisor: Advisor | null }>("/api/auth/me")
+      .then((r) => setAdvisor(r.advisor))
+      .catch(() => setAdvisor(null));
+  }, []);
 
   // ?demo opens the sample client directly; ?demo&property=p0 opens one of its properties.
   useEffect(() => {
@@ -29,14 +46,84 @@ export function Workspace() {
     }
   }, []);
 
+  // Autosave edits to a saved client, debounced so typing in a field doesn't send a request per keystroke.
+  useEffect(() => {
+    if (!clientId || !portfolio) return;
+    const body = JSON.stringify({ portfolio, assumptions });
+    if (body === lastSaved.current) return;
+    setSaveState("saving");
+    const timer = setTimeout(() => {
+      api(`/api/clients/${clientId}`, { method: "PUT", body: { portfolio, assumptions } })
+        .then(() => {
+          lastSaved.current = body;
+          setSaveState("saved");
+        })
+        .catch(() => setSaveState("error"));
+    }, AUTOSAVE_MS);
+    return () => clearTimeout(timer);
+  }, [clientId, portfolio, assumptions]);
+
+  function open(saved: SavedClient) {
+    lastSaved.current = JSON.stringify({ portfolio: saved.portfolio, assumptions: saved.assumptions });
+    setPortfolio(saved.portfolio);
+    setAssumptions(saved.assumptions);
+    setClientId(saved.id);
+    setSaveState("saved");
+  }
+
+  async function save(p: Portfolio, a: Assumptions) {
+    setSaveState("saving");
+    try {
+      open(await api<SavedClient>("/api/clients", { method: "POST", body: { portfolio: p, assumptions: a } }));
+    } catch {
+      setSaveState("error");
+    }
+  }
+
+  function close() {
+    setPortfolio(null);
+    setClientId(null);
+    setAssumptions(DEFAULT_ASSUMPTIONS);
+    setSaveState("saved");
+    lastSaved.current = null;
+  }
+
+  async function signOut() {
+    await api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    setAdvisor(null);
+    close();
+  }
+
   if (!portfolio) {
     return (
-      <Intake
-        onLoaded={(p) => {
-          setPortfolio(p);
-          setView({ kind: "portfolio" });
-        }}
-      />
+      <>
+        {loadError && (
+          <p className="notice floating" role="alert">
+            {loadError}
+          </p>
+        )}
+        <Intake
+          advisor={advisor}
+          onAuthed={setAdvisor}
+          onSignOut={signOut}
+          onLoaded={(p) => {
+            setLoadError(null);
+            setView({ kind: "portfolio" });
+            setPortfolio(p);
+            // A return read for a signed-in advisor is saved straight away; the demo stays a scratchpad.
+            if (advisor && p.source === "upload") save(p, DEFAULT_ASSUMPTIONS);
+          }}
+          onOpenSaved={(id) => {
+            setLoadError(null);
+            api<SavedClient>(`/api/clients/${id}`)
+              .then((saved) => {
+                open(saved);
+                setView({ kind: "portfolio" });
+              })
+              .catch((e: Error) => setLoadError(e.message));
+          }}
+        />
+      </>
     );
   }
 
@@ -85,11 +172,26 @@ export function Workspace() {
         </nav>
         <div className="topbar-actions">
           {portfolio.source === "demo" && <span className="badge">Demo client</span>}
+          {clientId ? (
+            <span className={`save-state${saveState === "error" ? " negative" : ""}`} role="status">
+              {saveState === "saving" ? "Saving…" : saveState === "error" ? "Not saved, will retry on next edit" : "Saved"}
+            </span>
+          ) : (
+            advisor && (
+              <button
+                className="btn secondary"
+                disabled={saveState === "saving"}
+                onClick={() => save(portfolio, assumptions)}
+              >
+                {saveState === "error" ? "Save failed, retry" : "Save client"}
+              </button>
+            )
+          )}
           <button className="btn ghost" onClick={() => setSettingsOpen(true)}>
             Tax &amp; assumptions
           </button>
-          <button className="btn ghost" onClick={() => setPortfolio(null)}>
-            New client
+          <button className="btn ghost" onClick={close}>
+            {advisor ? "All clients" : "New client"}
           </button>
         </div>
       </header>
