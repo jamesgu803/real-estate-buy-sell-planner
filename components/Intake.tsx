@@ -45,7 +45,7 @@ export function Intake({ onLoaded }: { onLoaded: (p: Portfolio) => void }) {
     <div className="intake">
       <div className="intake-copy">
         <p className="eyebrow">
-          <span className="wordmark-mark" aria-hidden>◆</span> Keystone
+          <span className="wordmark-mark" aria-hidden>◆</span> Buy/Sell Planner
         </p>
         <h1>
           Every rental on the return,
@@ -53,7 +53,7 @@ export function Intake({ onLoaded }: { onLoaded: (p: Portfolio) => void }) {
           <em>ready for the plan.</em>
         </h1>
         <p className="lede">
-          Drop in a client&rsquo;s tax return. Keystone reads Schedule E, builds the property portfolio, and models
+          Drop in a client&rsquo;s tax return. The planner reads Schedule E, builds the property portfolio, and models
           hold, sell, 1031 exchange and step-up for each property, so you walk into the meeting with the numbers.
         </p>
         <ul className="intake-points">

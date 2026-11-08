@@ -1,13 +1,13 @@
-# Keystone
+# Real Estate Buy/Sell Planner
 
-**Real estate planning for financial advisors.** Drop in a client's tax return and Keystone reads Schedule E, builds the property portfolio, and models hold, sell, 1031 exchange and step-up for every property, so the advisor walks into the meeting with after-tax numbers instead of a spreadsheet.
+**Decide when to hold, sell, or sell-and-buy (1031) each rental property.** Built for financial advisors: drop in a client's tax return and the planner reads Schedule E, builds the property portfolio, and models hold, sell, 1031 exchange and step-up for every property, so the advisor walks into the meeting with after-tax numbers instead of a spreadsheet.
 
 > An independent concept project by James Gu, exploring the AI-assisted real estate planning workflow for advisors. Not affiliated with or endorsed by any company. The demo client is fictional.
 
 ## What it does
 
 1. **Upload the return.** Claude reads the PDF and extracts every Schedule E property: rents, expenses, mortgage interest, depreciation, and basis or placed-in-service dates if a depreciation schedule is attached. The output is schema-constrained (structured outputs + Zod), so the app always gets typed data back. The PDF is processed in memory and never written to disk.
-2. **Fill the gaps honestly.** A return doesn't show market value or loan balance. Keystone estimates them (for example, building basis backed out of straight-line depreciation, loan balance from interest paid) and **flags every estimate** so the advisor confirms it with the client. Edits flow through every model on the page.
+2. **Fill the gaps honestly.** A return doesn't show market value or loan balance. The planner estimates them (for example, building basis backed out of straight-line depreciation, loan balance from interest paid) and **flags every estimate** so the advisor confirms it with the client. Edits flow through every model on the page.
 3. **See the portfolio.** Value, equity, after-tax cash flow and the tax bill if sold today, per property and in total, with planning signals: large embedded gain, low return on equity, negative cash flow, depreciation running out, high leverage, passive losses.
 4. **Compare strategies.** For each property, year-by-year after-tax wealth for:
    - **Hold, then sell:** cash flow reinvested, sold at the end of the horizon

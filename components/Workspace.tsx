@@ -66,7 +66,7 @@ export function Workspace() {
     <div className="shell">
       <header className="topbar no-print">
         <button className="wordmark" onClick={() => setView({ kind: "portfolio" })}>
-          <span className="wordmark-mark" aria-hidden>◆</span> Keystone
+          <span className="wordmark-mark" aria-hidden>◆</span> Buy/Sell Planner
         </button>
         <nav className="crumbs" aria-label="Breadcrumb">
           <button onClick={() => setView({ kind: "portfolio" })}>{client.household}</button>
