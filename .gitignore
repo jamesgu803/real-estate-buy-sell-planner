@@ -11,3 +11,6 @@ next-env.d.ts
 
 # Saved clients and sessions (SQLite)
 data/
+
+# Local Netlify folder
+.netlify
