@@ -11,9 +11,11 @@ export async function GET() {
     return Response.json({ ok: true, database });
   } catch (error) {
     console.error("Health check failed:", error);
-    const reason = error instanceof Error && /TURSO_DATABASE_URL/.test(error.message)
-      ? "TURSO_DATABASE_URL is not set on this deployment."
-      : "The database is configured but not reachable. Check TURSO_DATABASE_URL and TURSO_AUTH_TOKEN, then redeploy.";
+    const reason = !process.env.TURSO_DATABASE_URL
+      ? "TURSO_DATABASE_URL is not set on this deployment, so the app fell back to a local file the host can't write."
+      : !process.env.TURSO_AUTH_TOKEN
+        ? "TURSO_AUTH_TOKEN is not set on this deployment."
+        : "The database is configured but not reachable. Check TURSO_DATABASE_URL and TURSO_AUTH_TOKEN, then redeploy.";
     return Response.json({ ok: false, database, reason, anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY) }, { status: 503 });
   }
 }
