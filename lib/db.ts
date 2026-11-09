@@ -1,5 +1,5 @@
 import { mkdirSync } from "node:fs";
-import { type Client, createClient } from "@libsql/client";
+import type { Client } from "@libsql/client";
 
 /**
  * libSQL speaks SQLite to either a local file (development) or a hosted Turso
@@ -35,7 +35,11 @@ CREATE INDEX IF NOT EXISTS clients_advisor ON clients(advisor_id, updated_at DES
 `;
 
 export async function openDatabase(url: string, authToken?: string): Promise<Client> {
+  const local = url.startsWith("file:") || url === ":memory:";
   if (url.startsWith("file:")) mkdirSync("data", { recursive: true });
+  // The default entry loads libSQL's native engine even for remote URLs, and serverless
+  // bundles (Netlify, Vercel) may not ship that binary. Turso only needs the fetch-based client.
+  const { createClient } = local ? await import("@libsql/client") : await import("@libsql/client/web");
   const client = createClient({ url, authToken });
   await client.executeMultiple(SCHEMA);
   return client;
@@ -44,8 +48,8 @@ export async function openDatabase(url: string, authToken?: string): Promise<Cli
 function databaseUrl(): string {
   const url = process.env.TURSO_DATABASE_URL;
   if (url) return url;
-  if (process.env.VERCEL) {
-    throw new Error("TURSO_DATABASE_URL is not set. Vercel has no persistent disk, so saved clients need a hosted database.");
+  if (process.env.VERCEL || process.env.NETLIFY) {
+    throw new Error("TURSO_DATABASE_URL is not set. Serverless hosts have no persistent disk, so saved clients need a hosted database.");
   }
   return "file:data/planner.db";
 }
